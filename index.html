@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>Demit Pong - SUI Edition</title>
+    <script type="module" crossorigin src="/demit-sui-pong/assets/index-DGZJxqrk.js"></script>
+    <link rel="stylesheet" crossorigin href="/demit-sui-pong/assets/index-CU98vNAD.css">
+  </head>
+  <body>
+    <div id="app">
+      <div id="header">
+        <h1>PONG</h1>
+        <div id="wallet-connector"></div>
+      </div>
+
+      <!-- Menu untuk memulai permainan -->
+      <div id="play-menu">
+        <h2>Ready to Play?</h2>
+        <div class="play-options">
+          <button id="play-with-sui-btn" onclick="window.handlePayToPlay('SUI')">Play (0.02 SUI)</button>
+          <button id="play-with-dp-btn" onclick="window.handlePayToPlay('DP')">Play (0.1 DP)</button>
+        </div>
+      </div>
+      
+      <canvas id="gameCanvas"></canvas>
+
+      <div class="main-content">
+        <div id="marketplace-section">
+          <h2>Marketplace</h2>
+          <div id="marketplace-display">
+            Loading store items...
+          </div>
+        </div>
+
+        <div id="profile-creator" class="hidden">
+          <h2>Welcome, New Player!</h2>
+          <p>To get started, you need to create your on-chain player profile. This is a one-time transaction.</p>
+          <button id="create-profile-btn">Create My Player Profile</button>
+        </div>
+
+        <div id="onchain-info">
+          <h2>My On-Chain Assets</h2>
+          <div id="dp-balance">Connect wallet to see balance...</div>
+          <h3>My Paddles (Inventory)</h3>
+          <div id="inventory-display">
+            Connect your wallet to see your paddles.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </body>
+</html>
