@@ -8,17 +8,13 @@ let player, computer, ball;
 let aspectRatio = 4 / 3;
 let playerProfileId = null;
 let isGameOver = true;
-
 let equippedPaddle = {
     color: 'white',
     speedBonus: 0,
     lengthMultiplier: 1.0 
 };
-
 const winningScore = 5;
 const PADDLE_DEFAULT_HEIGHT = 100;
-
-// --- KONTROL GAME STATE ---
 
 export function startGameLoop() {
     console.log("Preparing to start game...");
@@ -28,7 +24,6 @@ export function startGameLoop() {
     player.score = 0;
     computer.score = 0;
     render();
-
     let countdown = 6;
     const countdownInterval = setInterval(() => {
         render();
@@ -63,8 +58,6 @@ function handleGameOver(winnerText) {
     }, 10);
 }
 
-// --- LOGIKA INTI GAME ---
-
 function gameLoop() {
     if (isGameOver) return;
     update();
@@ -76,11 +69,9 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
     computer.y += (ball.y - (computer.y + computer.height / 2)) * 0.1;
-
     if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
         ball.velocityY = -ball.velocityY;
     }
-
     let scored = false;
     if (ball.x - ball.radius < 0) {
         computer.score++;
@@ -89,7 +80,6 @@ function update() {
         player.score++;
         scored = true;
     }
-    
     if (scored) {
         if (player.score >= winningScore) {
             handleGameOver("YOU WIN!");
@@ -99,19 +89,16 @@ function update() {
             resetBall();
         }
     }
-    
     let targetPaddle = ball.velocityX < 0 ? player : computer;
     if (collision(ball, targetPaddle)) {
         let collidePoint = (ball.y - (targetPaddle.y + targetPaddle.height / 2));
         collidePoint = collidePoint / (targetPaddle.height / 2);
         let angleRad = (Math.PI / 4) * collidePoint;
         let direction = (ball.velocityX < 0) ? 1 : -1;
-        
         let currentSpeed = ball.speed;
         if (targetPaddle === player) {
             currentSpeed += equippedPaddle.speedBonus;
         }
-
         ball.velocityX = direction * currentSpeed * Math.cos(angleRad);
         ball.velocityY = currentSpeed * Math.sin(angleRad);
         ball.speed += 0.5;
@@ -126,15 +113,12 @@ function render() {
     context.textAlign = 'center';
     context.fillText(player.score, canvas.width / 4, canvas.height / 5);
     context.fillText(computer.score, 3 * canvas.width / 4, canvas.height / 5);
-    
     player.height = PADDLE_DEFAULT_HEIGHT * equippedPaddle.lengthMultiplier;
     player.color = equippedPaddle.color;
     context.fillStyle = player.color;
     context.fillRect(player.x, player.y, player.width, player.height);
-    
     context.fillStyle = 'white';
     context.fillRect(computer.x, computer.y, computer.width, computer.height);
-    
     context.fillStyle = 'white';
     context.beginPath();
     context.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, false);
@@ -160,8 +144,6 @@ function movePaddle(evt) {
     let rect = canvas.getBoundingClientRect();
     player.y = evt.clientY - rect.top - player.height / 2;
 }
-
-// --- INISIALISASI & FUNGSI ON-CHAIN ---
 
 export function initializeGame() {
     canvas = document.getElementById('gameCanvas');
@@ -230,6 +212,7 @@ export async function fetchAndDisplayData(address) {
         if (!playerProfile) {
             onchainInfoDiv.classList.add('hidden');
             profileCreatorDiv.classList.remove('hidden');
+            addCreateProfileListener();
             equippedPaddle = { color: 'white', speedBonus: 0, lengthMultiplier: 1.0 };
             renderStatic();
         } else {
@@ -282,14 +265,12 @@ function displayPaddles(paddles, profile) {
         const isEquipped = paddleId === equippedId;
         const rarity = fields.rarity.toLowerCase();
         const imagePath = `${import.meta.env.BASE_URL}${rarity}.png`;
-        
         let lengthBonusText = '';
         switch (fields.rarity) {
             case "Legendary": lengthBonusText = "+160% length"; break;
             case "Epic": lengthBonusText = "+90% length"; break;
             case "Master": lengthBonusText = "+40% length"; break;
         }
-
         const paddleDiv = document.createElement('div');
         paddleDiv.className = 'paddle-item' + (isEquipped ? ' equipped' : '');
         paddleDiv.innerHTML = `
@@ -317,6 +298,14 @@ function addInventoryClickListener() {
             }
             window.handleEquip(playerProfileId, paddleId);
         }
+    });
+}
+
+function addCreateProfileListener() {
+    const createBtn = document.getElementById('create-profile-btn');
+    createBtn.replaceWith(createBtn.cloneNode(true)); 
+    document.getElementById('create-profile-btn').addEventListener('click', () => {
+        window.handleCreateProfile();
     });
 }
 

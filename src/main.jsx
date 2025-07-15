@@ -26,7 +26,7 @@ function App() {
   const suiClient = useSuiClient();
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // ... (handleEquip, handleBuy, handleCreateProfile tidak berubah) ...
+  // Fungsi-fungsi handler transaksi
   const handleEquip = (profileId, paddleId) => {
     const tx = new Transaction();
     tx.moveCall({
@@ -85,67 +85,52 @@ function App() {
     );
   };
 
-  // Di dalam komponen App di src/main.jsx
-
-    const handlePayToPlay = async (paymentType) => {
-        if (!account) return alert("Please connect your wallet first.");
-
-        const tx = new Transaction();
-        const treasuryAddress = "0x399b1a8685d397bdd4debfb3182079ef4e9ab7931595ce756eb69500dd3d8c11";
-
-        try {
-            // ... (logika if/else untuk pembayaran SUI dan DP tidak berubah) ...
-            if (paymentType === 'SUI') {
-                const sui_fee = BigInt(20_000_000);
-                const { data: coins } = await suiClient.getCoins({ owner: account.address, coinType: '0x2::sui::SUI' });
-                if (BigInt(coins.reduce((acc, coin) => acc + parseInt(coin.balance), 0)) < sui_fee) {
-                    return alert("You don't have enough SUI to pay.");
-                }
-                const paymentCoin = tx.splitCoins(tx.gas, [tx.pure.u64(sui_fee)]);
-                tx.moveCall({
-                    target: `${PACKAGE_ID}::game_logic::pay_to_play_with_sui`,
-                    arguments: [paymentCoin, tx.pure.address(treasuryAddress)],
-                });
-            } else if (paymentType === 'DP') {
-                const dp_fee = BigInt(100_000);
-                const dpCoinType = `${PACKAGE_ID}::demit_pong_coin::DEMIT_PONG_COIN`;
-                const { data: dpCoins } = await suiClient.getCoins({ owner: account.address, coinType: dpCoinType });
-                if (dpCoins.length === 0 || BigInt(dpCoins.reduce((acc, coin) => acc + parseInt(coin.balance), 0)) < dp_fee) {
-                    return alert("You don't have enough $DP coin to pay.");
-                }
-                const [primaryCoin, ...otherCoins] = dpCoins.map(c => c.coinObjectId);
-                const mainCoin = tx.object(primaryCoin);
-                if (otherCoins.length > 0) {
-                tx.mergeCoins(mainCoin, otherCoins.map(c => tx.object(c)));
-                }
-                const paymentCoin = tx.splitCoins(mainCoin, [tx.pure.u64(dp_fee)]);
-                tx.moveCall({
-                    target: `${PACKAGE_ID}::game_logic::pay_to_play_with_dp`,
-                    arguments: [paymentCoin],
-                });
-            } else {
-                return;
+  const handlePayToPlay = async (paymentType) => {
+    if (!account) return alert("Please connect your wallet first.");
+    const tx = new Transaction();
+    const treasuryAddress = "0x399b1a8685d397bdd4debfb3182079ef4e9ab7931595ce756eb69500dd3d8c11";
+    try {
+        if (paymentType === 'SUI') {
+            const sui_fee = BigInt(20_000_000);
+            const { data: coins } = await suiClient.getCoins({ owner: account.address, coinType: '0x2::sui::SUI' });
+            if (BigInt(coins.reduce((acc, coin) => acc + parseInt(coin.balance), 0)) < sui_fee) {
+                return alert("You don't have enough SUI to pay.");
             }
-
-            signAndExecute({ transaction: tx }, {
-                onSuccess: (result) => {
-                console.log("Payment successful! Digest:", result.digest);
-                
-                // === PERBAIKAN DI SINI ===
-                // Panggil startGameLoop SEKARANG.
-                startGameLoop(); 
-                
-                // Perbarui UI SETELAH jeda singkat agar data on-chain sempat sinkron.
-                setTimeout(() => {
-                    fetchAndDisplayData(account.address); 
-                }, 2000); // Jeda 2 detik
-                },
-                onError: (error) => alert("Payment failed: " + error.message),
+            const paymentCoin = tx.splitCoins(tx.gas, [tx.pure.u64(sui_fee)]);
+            tx.moveCall({
+                target: `${PACKAGE_ID}::game_logic::pay_to_play_with_sui`,
+                arguments: [paymentCoin, tx.pure.address(treasuryAddress)],
             });
-        } catch(e) {
-            alert(`An error occurred: ${e.message}`)
-        }
-    };
+        } else if (paymentType === 'DP') {
+            const dp_fee = BigInt(100_000);
+            const dpCoinType = `${PACKAGE_ID}::demit_pong_coin::DEMIT_PONG_COIN`;
+            const { data: dpCoins } = await suiClient.getCoins({ owner: account.address, coinType: dpCoinType });
+            if (dpCoins.length === 0 || BigInt(dpCoins.reduce((acc, coin) => acc + parseInt(coin.balance), 0)) < dp_fee) {
+                return alert("You don't have enough $DP coin to pay.");
+            }
+            const [primaryCoin, ...otherCoins] = dpCoins.map(c => c.coinObjectId);
+            const mainCoin = tx.object(primaryCoin);
+            if (otherCoins.length > 0) {
+              tx.mergeCoins(mainCoin, otherCoins.map(c => tx.object(c)));
+            }
+            const paymentCoin = tx.splitCoins(mainCoin, [tx.pure.u64(dp_fee)]);
+            tx.moveCall({
+                target: `${PACKAGE_ID}::game_logic::pay_to_play_with_dp`,
+                arguments: [paymentCoin],
+            });
+        } else { return; }
+        signAndExecute({ transaction: tx }, {
+            onSuccess: (result) => {
+              console.log("Payment successful! Digest:", result.digest);
+              setTimeout(() => { fetchAndDisplayData(account.address); }, 2000);
+              startGameLoop();
+            },
+            onError: (error) => alert("Payment failed: " + error.message),
+        });
+    } catch(e) {
+        alert(`An error occurred: ${e.message}`)
+    }
+  };
 
   useEffect(() => {
     if (!isInitialized) {
@@ -153,10 +138,13 @@ function App() {
       fetchMarketplaceData();
       setIsInitialized(true);
     }
+    
+    // Setup "jembatan" ke window agar bisa dipanggil dari mana saja
     window.handleEquip = handleEquip;
     window.handleBuy = handleBuy;
     window.handleCreateProfile = handleCreateProfile;
     window.handlePayToPlay = handlePayToPlay;
+
     if (account) {
       fetchAndDisplayData(account.address);
     } else {
