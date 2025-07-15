@@ -1,0 +1,192 @@
+/* --- Aturan Dasar & Penguncian Scroll Halaman --- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    font-family: 'Press Start 2P', cursive;
+    color: #fff;
+    overflow: hidden; 
+}
+
+h1, h2, h3 {
+    text-align: center;
+}
+
+/* --- Layout Aplikasi Utama dengan Flexbox Vertikal --- */
+#app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    gap: 20px;
+    padding-top: 20px;
+}
+
+#header {
+    flex-shrink: 0;
+}
+
+canvas {
+    border: 2px solid #fff;
+    flex-shrink: 0; 
+    width: 100%; 
+    max-width: 800px;
+    height: auto; 
+    box-sizing: border-box;
+    margin: 0 10px;
+}
+
+/* --- KONTENER KONTEN YANG BISA DI-SCROLL --- */
+.main-content {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px 20px 20px;
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #555 #222;
+}
+.main-content::-webkit-scrollbar {
+    width: 8px;
+}
+.main-content::-webkit-scrollbar-track {
+    background: #222;
+}
+.main-content::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+}
+
+/* --- Area Spesifik --- */
+#marketplace-section, #onchain-info {
+    border: 2px solid white;
+    padding: 20px;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 350px;
+    height: max-content; 
+}
+
+#profile-creator {
+    border: 2px solid yellow;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+#profile-creator p {
+    margin-bottom: 20px;
+}
+
+#marketplace-display, #inventory-display {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.market-item, .paddle-item {
+    border-bottom: 1px solid #555;
+    padding-bottom: 10px;
+}
+
+.market-item:last-child, .paddle-item:last-child {
+    border-bottom: none;
+}
+
+.equipped {
+    opacity: 0.7;
+    border-left: 4px solid lightgreen;
+    padding-left: 10px;
+}
+
+/* --- Elemen Umum --- */
+button {
+    background-color: #fff;
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    font-family: 'Press Start 2P', cursive;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+button:hover:not(:disabled) {
+    background-color: #ddd;
+}
+
+button:disabled {
+    background-color: #555;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Di src/style.css, tambahkan di paling bawah */
+
+#play-menu {
+    border: 2px solid lightblue;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    background-color: #111;
+}
+
+.play-options {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.market-item, .paddle-item {
+    display: flex;
+    align-items: center; /* Sejajarkan item secara vertikal */
+    gap: 15px; /* Jarak antara gambar dan detail */
+    border-bottom: 1px solid #555;
+    padding-bottom: 10px;
+}
+
+.item-details {
+    flex-grow: 1; /* Biarkan bagian detail mengisi sisa ruang */
+}
+
+/* Ukuran untuk gambar item */
+.item-image {
+    width: 100px; /* Ukuran gambar di marketplace */
+    height: auto;
+    object-fit: contain; /* Pastikan gambar tidak gepeng */
+    background-color: #222; /* Latar belakang gelap jika gambar transparan */
+    border-radius: 4px;
+}
+
+.item-image.small {
+    width: 60px; /* Ukuran gambar yang lebih kecil di inventory */
+}
+
+/* Pindahkan tombol di marketplace ke paling kanan */
+.market-item button {
+    margin-left: auto; /* Trik flexbox untuk mendorong ke kanan */
+}
+
+/* --- Media Query untuk Layar Kecil (Mobile) --- */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    #marketplace-section, #onchain-info {
+        min-width: 90%;
+    }
+}
